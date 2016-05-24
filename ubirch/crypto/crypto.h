@@ -27,17 +27,22 @@
 #include <wolfssl/wolfcrypt/rsa.h>
 
 //! @brief SHA512 hash size in bytes
-#define SHA512_HASH_SIZE SHA512_DIGEST_SIZE
+#define SHA512_HASH_SIZE      SHA512_DIGEST_SIZE
+//! @brief Size of the ED25519 keypair
+#define ED25519_KEYPAIR_SIZE      64
+//! @brief Size of the ED25519 public key
+#define ED25519_PUB_KEY_SIZE  32
 
 //! ED25519 key
 typedef ed25519_key uc_ed25519_key;
+
 //! RSA key
 typedef RsaKey uc_rsa_key;
 
 //! @brief PKCS#8 encoded public ED25519 key
 typedef struct __attribute__((__packed__)) _uc_ed25519_pub_pkcs8 {
-    uint8_t header[15]; /*!< ASN.1 header */
-    uint8_t key[32];    /*!< the actual ED25519 key */
+    uint8_t header[15];                   /*!< ASN.1 header */
+    uint8_t key[ED25519_PUB_KEY_SIZE];    /*!< the actual ED25519 key */
 } uc_ed25519_pub_pkcs8; /*!< ED25591 public key encoded as PKCS#8 */
 
 //! Random Number Generator instance
@@ -86,13 +91,32 @@ char *uc_sha512_encoded(const unsigned char *in, size_t inlen);
 
 /*!
  * @brief Create new ECC key.
+ * @param key pointer to the structure to store the key in
  */
 bool uc_ecc_create_key(uc_ed25519_key *key);
 
 /*!
  * @brief Import ECC key from array.
+ * @param key where to store the key
+ * @param in the data array containing the complete private key
+ * @param inlen length of the input array
  */
 bool uc_import_ecc_key(uc_ed25519_key *key, const unsigned char *in, size_t inlen);
+
+/*!
+ * @brief Import ECC public key from array.
+ * @param key the key where to store the public part in
+ * @param in the data array containing the public key
+ * @param inlen length of the input array
+ */
+bool uc_import_ecc_pub_key(uc_ed25519_key *key, const unsigned char *in, size_t inlen);
+
+/*!
+ * @brief Import ECC public key from encoded PKCS#8 structure.
+ * @param key the key where to store the imported public key
+ * @param pkcs8 the PKCS#8 encoded public key
+ */
+bool uc_import_ecc_pub_key_encoded(uc_ed25519_key *key, uc_ed25519_pub_pkcs8 *pkcs8);
 
 /*!
  * @brief Export ECC public key.
@@ -127,3 +151,14 @@ bool uc_ecc_sign(uc_ed25519_key *key, const unsigned char *in, size_t inlen, uns
  * @return the Base64 encoded signature
  */
 char *uc_ecc_sign_encoded(uc_ed25519_key *key, const unsigned char *in, size_t inlen);
+
+/*!
+ * @brief Verify signature of a message using the public key and the signature.
+ * @param key the public key to verify against
+ * @param in the byte array to verify
+ * @param inlen the length of the byte array to verify
+ * @param signature the signature to verify
+ * @param siglen the length of the signature
+ * @return true if message and signature match
+ */
+bool uc_ecc_verify(uc_ed25519_key *key, const unsigned char *in, size_t inlen, const unsigned char *signature, size_t siglen);

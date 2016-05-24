@@ -122,7 +122,7 @@ char *uc_sha512_encoded(const unsigned char *in, size_t inlen) {
 // === ED25519 ===
 
 bool uc_ecc_create_key(uc_ed25519_key *key) {
-  if (uc_random_init());
+  if (!uc_random_init()) return false;
 
   wc_ed25519_init(key);
   if (wc_ed25519_make_key(&uc_random, ED25519_KEY_SIZE, key))
@@ -131,22 +131,42 @@ bool uc_ecc_create_key(uc_ed25519_key *key) {
   BUFDEBUG("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
   BUFDEBUG("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
-  return false;
+  return true;
 }
 
 bool uc_import_ecc_key(uc_ed25519_key *key, const unsigned char *in, size_t inlen) {
-  if (inlen < ED25519_PRV_KEY_SIZE) return false;
-  uc_random_init();
+  if (inlen != ED25519_PRV_KEY_SIZE) return false;
 
   wc_ed25519_init(key);
-  if (wc_ed25519_import_private_key(in, ED25519_KEY_SIZE, in + 32, ED25519_PUB_KEY_SIZE, key))
+  const int status = wc_ed25519_import_private_key(in, ED25519_KEY_SIZE, in + 32, ED25519_PUB_KEY_SIZE, key);
+  if (status < 0) {
+    PRINTF("import ecc key failed: [%d]\r\n", status);
     return false;
-
+  }
   BUFDEBUG("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
   BUFDEBUG("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
   return true;
 }
+
+bool uc_import_ecc_pub_key(uc_ed25519_key *key, const unsigned char *in, size_t inlen) {
+  if(inlen != ED25519_PUB_KEY_SIZE) return false;
+
+  wc_ed25519_init(key);
+  const int status = wc_ed25519_import_public(in, inlen, key);
+  if(status < 0) {
+    PRINTF("import ecc pub failed: [%d]\r\n", status);
+    return false;
+  }
+  BUFDEBUG("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
+
+  return true;
+}
+
+bool uc_import_ecc_pub_key_encoded(uc_ed25519_key *key, uc_ed25519_pub_pkcs8 *pkcs8) {
+  return uc_import_ecc_pub_key(key, (const unsigned char *) &(pkcs8->key), sizeof(pkcs8->key));
+}
+
 
 bool uc_ecc_export_pub(ed25519_key *key, uc_ed25519_pub_pkcs8 *pkcs8) {
   // copy the ASN.1 (PKCS#8) header into the encoded public key array
@@ -192,6 +212,17 @@ char *uc_ecc_sign_encoded(uc_ed25519_key *key, const unsigned char *in, size_t i
   if (!uc_ecc_sign(key, in, inlen, signature)) return NULL;
 
   return uc_base64_encode(signature, ED25519_SIG_SIZE);
+}
+
+bool uc_ecc_verify(uc_ed25519_key *key, const unsigned char *in, size_t inlen, const unsigned char *signature, size_t siglen) {
+  int verification = 0;
+  int status = wc_ed25519_verify_msg((byte *) signature, siglen, in, inlen, &verification, key);
+  if(status < 0) {
+    PRINTF("ecc signature verification failed: [%d] %d", status, verification);
+    return false;
+  }
+
+  return status == 0 && verification;
 }
 
 
