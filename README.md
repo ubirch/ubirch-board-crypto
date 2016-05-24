@@ -6,7 +6,13 @@ To use this library, use the `require()` method from the [ubirch-arm-toolchain](
 as follows. `${BOARD}` should have been set earlier or during setup.
 
 ```
-require(PACKAGE crypto BOARD ${BOARD} VERSION 1.0)
+require(PACKAGE ubirch-crypto BOARD ${BOARD} VERSION 1.0)
+```
+
+To use the library you link to the following target:
+
+```
+target_link_libraries(<target> ubirch-crypto::${BOARD}::crypto)
 ```
 
 ## License
