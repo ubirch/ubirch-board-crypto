@@ -218,7 +218,7 @@ bool uc_ecc_verify(uc_ed25519_key *key, const unsigned char *in, size_t inlen, c
   int verification = 0;
   int status = wc_ed25519_verify_msg((byte *) signature, siglen, in, inlen, &verification, key);
   if(status < 0) {
-    PRINTF("ecc signature verification failed: [%d] %d", status, verification);
+    PRINTF("ecc signature verification failed: [%d] %d\r\n", status, verification);
     return false;
   }
 
