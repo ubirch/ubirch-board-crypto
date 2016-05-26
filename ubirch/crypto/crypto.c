@@ -31,20 +31,16 @@
 #include "crypto.h"
 
 #ifndef NDEBUG
-#  define BUFDEBUG(p, b, s) dbg_dump((p), (b), (s))
+#  define UCERROR(p, e)   PRINTF("E: %s: %d\r\n", (p), (e))
+#  define UCDUMP(p, b, s) dbg_dump((p), (b), (s))
 #else
-#  define BUFDEBUG(...)
+#  define UCERROR(...)
+#  define UCDUMP(...)
 #endif
 
 WC_RNG uc_random;
 
 static bool initialized = false;
-
-#ifndef NDEBUG
-#  define UCERROR(p, r)  PRINTF("E: %s: %d\r\n", (p), (r))
-#else
-#  define UCERROR(p, r)
-#endif
 
 bool uc_random_init() {
   if (initialized) return true;
@@ -107,7 +103,7 @@ bool uc_sha512(const unsigned char *in, size_t inlen, unsigned char *hash) {
     UCERROR("sha512 final", r);
     return false;
   }
-  BUFDEBUG("SHA512", hash, SHA512_DIGEST_SIZE);
+  UCDUMP("SHA512", hash, SHA512_DIGEST_SIZE);
 
   return true;
 }
@@ -128,8 +124,8 @@ bool uc_ecc_create_key(uc_ed25519_key *key) {
   if (wc_ed25519_make_key(&uc_random, ED25519_KEY_SIZE, key))
     return false;
 
-  BUFDEBUG("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
-  BUFDEBUG("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
+  UCDUMP("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
+  UCDUMP("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
   return true;
 }
@@ -140,11 +136,11 @@ bool uc_import_ecc_key(uc_ed25519_key *key, const unsigned char *in, size_t inle
   wc_ed25519_init(key);
   const int status = wc_ed25519_import_private_key(in, ED25519_KEY_SIZE, in + 32, ED25519_PUB_KEY_SIZE, key);
   if (status < 0) {
-    PRINTF("import ecc key failed: [%d]\r\n", status);
+    UCERROR("import ecc key", status);
     return false;
   }
-  BUFDEBUG("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
-  BUFDEBUG("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
+  UCDUMP("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
+  UCDUMP("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
   return true;
 }
@@ -155,10 +151,10 @@ bool uc_import_ecc_pub_key(uc_ed25519_key *key, const unsigned char *in, size_t 
   wc_ed25519_init(key);
   const int status = wc_ed25519_import_public(in, inlen, key);
   if(status < 0) {
-    PRINTF("import ecc pub failed: [%d]\r\n", status);
+    UCERROR("import ecc pub", status);
     return false;
   }
-  BUFDEBUG("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
+  UCDUMP("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
   return true;
 }
@@ -178,10 +174,10 @@ bool uc_ecc_export_pub(ed25519_key *key, uc_ed25519_pub_pkcs8 *pkcs8) {
   word32 len = ED25519_PUB_KEY_SIZE;
   const int status = wc_ed25519_export_public(key, pkcs8->key, &len);
   if (status < 0 || len != ED25519_PUB_KEY_SIZE) {
-    PRINTF("ecc pub key export failed: [%d] %d\r\n", status, len);
+    UCERROR("ecc pub export", status);
     return false;
   }
-  BUFDEBUG("ECCPUB", (const unsigned char *) pkcs8, sizeof(uc_ed25519_pub_pkcs8));
+  UCDUMP("ECCPUB", (const unsigned char *) pkcs8, sizeof(uc_ed25519_pub_pkcs8));
 
   return true;
 }
@@ -199,10 +195,10 @@ bool uc_ecc_sign(uc_ed25519_key *key, const unsigned char *in, size_t inlen, uns
 
   const int status = wc_ed25519_sign_msg(in, inlen, signature, &len, key);
   if (status < 0 || len != ED25519_SIG_SIZE) {
-    PRINTF("ecc signature failed: [%d] %d\r\n", status, len);
+    UCERROR("ecc sign", status);
     return false;
   }
-  BUFDEBUG("ECCSIG", signature, len);
+  UCDUMP("ECCSIG", signature, len);
 
   return true;
 }
@@ -218,7 +214,7 @@ bool uc_ecc_verify(uc_ed25519_key *key, const unsigned char *in, size_t inlen, c
   int verification = 0;
   int status = wc_ed25519_verify_msg((byte *) signature, siglen, in, inlen, &verification, key);
   if(status < 0) {
-    PRINTF("ecc signature verification failed: [%d] %d\r\n", status, verification);
+    UCERROR("ecc verify", status);
     return false;
   }
 
