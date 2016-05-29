@@ -5,7 +5,7 @@ set(BOARD "ubirch1r02" CACHE STRING "board name")
 project(ubirch-crypto C ASM)
 
 require(PACKAGE ubirch BOARD ${BOARD} VERSION 1.0)
-require(PACKAGE wolfssl MCU ${MCU} VERSION 3.9.0)
+require(PACKAGE wolfSSL MCU ${MCU} VERSION 3.9.0)
 
 add_library(crypto ubirch/crypto/crypto.c)
 target_link_libraries(crypto
