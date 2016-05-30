@@ -19,7 +19,7 @@ function init() {
 }
 
 function build_software() {
-  docker run --user `id -u`:`id -g` -e "HOME=/build" --workdir=/build/ubirch-board-crypto --volume=${PWD}/..:/build -e "TOOLCHAIN=${TOOLCHAIN}" -e "WOLFSSL_ROOT=${WOLFSSL_ROOT}" --entrypoint=/bin/bash ubirch/arm-build:${ARM_CONTAINER_VERSION} ./build.sh
+  docker run --user `id -u`:`id -g` -e "HOME=/build" --workdir=/build/ubirch-board-crypto --volume=${PWD}/..:/build -e "TOOLCHAIN=${TOOLCHAIN}" -e "WOLFSSL_ROOT=${WOLFSSL_ROOT}" -e "wolfSSL_DIR=${WOLFSSL_ROOT}" --entrypoint=/bin/bash ubirch/arm-build:${ARM_CONTAINER_VERSION} ./build.sh
   if [ $? -ne 0 ]; then
       echo "Docker build failed"
       exit 1
