@@ -2,7 +2,7 @@
 
 The ubirch crypto support library. Depends on the MCU and BOARD it is compiled for.
 
-To use this library, use the `require()` method from the [ubirch-arm-toolchain](https://gitlab.com/ubirch/ubirch-arm-toolchain)
+To use this library, use the `require()` method from the [ubirch-arm-toolchain](https://github.com/ubirch/ubirch-arm-toolchain)
 as follows. `${BOARD}` should have been set earlier or during setup.
 
 ```
