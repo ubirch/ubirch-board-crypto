@@ -21,6 +21,7 @@
  * ```
  */
 
+#include <fsl_trng.h>
 #include <wolfssl/wolfcrypt/sha512.h>
 #include <wolfssl/wolfcrypt/coding.h>
 #include <wolfssl/wolfcrypt/random.h>
