@@ -44,10 +44,10 @@ typedef struct {
 extern WC_RNG uc_random;
 
 /*!
- * @brief Initialize random number generator.
+ * @brief Initialize the crypto unit, hardware and random number generator.
  * @return true if already initialized and initialization was successful
  */
-bool uc_random_init();
+bool uc_init();
 
 /*!
  * @brief Encode a byte array in Base64 encoding.

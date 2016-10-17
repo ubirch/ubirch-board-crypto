@@ -21,6 +21,9 @@
  * ```
  */
 
+#if !FSL_FEATURE_SOC_LTC_COUNT
+#  include <fsl_ltc.h>
+#endif
 #include <fsl_trng.h>
 #include <wolfssl/wolfcrypt/sha512.h>
 #include <wolfssl/wolfcrypt/coding.h>
@@ -43,13 +46,19 @@ WC_RNG uc_random;
 
 static bool initialized = false;
 
-bool uc_random_init() {
+bool uc_init() {
   if (initialized) return true;
   trng_config_t trngConfig;
   TRNG_GetDefaultConfig(&trngConfig);
   trngConfig.sampleMode = kTRNG_SampleModeVonNeumann;
   if (TRNG_Init(TRNG0, &trngConfig) != kStatus_Success) return false;
   if (wc_InitRng(&uc_random)) return false;
+
+#if !FSL_FEATURE_SOC_LTC_COUNT
+  PRINTF("- no LTC available\r\n");
+#else
+  LTC_Init(LTC0);
+#endif
 
   initialized = true;
   return true;
@@ -119,7 +128,7 @@ char *uc_sha512_encoded(const unsigned char *in, size_t inlen) {
 // === ED25519 ===
 
 bool uc_ecc_create_key(uc_ed25519_key *key) {
-  if (!uc_random_init()) return false;
+  if (!uc_init()) return false;
 
   wc_ed25519_init(key);
   if (wc_ed25519_make_key(&uc_random, ED25519_KEY_SIZE, key))
