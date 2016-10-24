@@ -91,7 +91,7 @@ char *uc_sha512_encoded(const unsigned char *in, size_t inlen);
 bool uc_ecc_create_key(uc_ed25519_key *key);
 
 /*!
- * @brief Import ECC key from array.
+ * @brief Import ECC key from array ([32b priv, 32b pub], like raw bytes of key).
  * @param key where to store the key
  * @param in the data array containing the complete private key
  * @param inlen length of the input array

@@ -144,7 +144,7 @@ bool uc_import_ecc_key(uc_ed25519_key *key, const unsigned char *in, size_t inle
   if (inlen != ED25519_PRV_KEY_SIZE) return false;
 
   wc_ed25519_init(key);
-  const int status = wc_ed25519_import_private_key(in, ED25519_KEY_SIZE, in + 32, ED25519_PUB_KEY_SIZE, key);
+  const int status = wc_ed25519_import_private_key(in + 32, ED25519_KEY_SIZE, in, ED25519_PUB_KEY_SIZE, key);
   if (status < 0) {
     UCERROR("import ecc key", status);
     return false;
