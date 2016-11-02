@@ -134,7 +134,7 @@ bool uc_ecc_create_key(uc_ed25519_key *key) {
   if (wc_ed25519_make_key(&uc_random, ED25519_KEY_SIZE, key))
     return false;
 
-  UCDUMP("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
+//  UCDUMP("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
   UCDUMP("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
   return true;
@@ -149,7 +149,7 @@ bool uc_import_ecc_key(uc_ed25519_key *key, const unsigned char *in, size_t inle
     UCERROR("import ecc key", status);
     return false;
   }
-  UCDUMP("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
+//  UCDUMP("ECCPRV", key->k, ED25519_PRV_KEY_SIZE);
   UCDUMP("ECCPUB", key->p, ED25519_PUB_KEY_SIZE);
 
   return true;
